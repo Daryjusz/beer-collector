@@ -6,8 +6,8 @@ import com.mygdx.screens.SplashScreen;
 
 public class MyGdxGame extends Game {
 
-    public final static int WIDTH = 1080;
-    public final static int HEIGHT = 700;
+    public final static int WIDTH = 500;
+    public final static int HEIGHT = 1000;
 
     private int points = 0;
 

@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.mygdx.controllers.BeerController;
 import com.mygdx.entities.Beer;
@@ -25,7 +26,7 @@ public class GamePlayScreen extends AbstractScreen {
 
     public void init() {
         initPlayer();
-        initNewBeerController();
+        initBeerController();
         initLabels();
     }
 
@@ -34,16 +35,16 @@ public class GamePlayScreen extends AbstractScreen {
         style.font = new BitmapFont();
 
         scoreLabel = new Label("Score: ", style);
-        scoreLabel.setPosition(50, 650);
+        scoreLabel.setPosition(30, MyGdxGame.HEIGHT - 50);
 
         lifeLabel = new Label("Lifes: ", style);
-        lifeLabel.setPosition(50, 630);
+        lifeLabel.setPosition(30, MyGdxGame.HEIGHT - 70);
 
         stage.addActor(scoreLabel);
         stage.addActor(lifeLabel);
     }
 
-    public void initNewBeerController() {
+    public void initBeerController() {
         beerController = new BeerController(game, stage);
     }
 
@@ -65,57 +66,41 @@ public class GamePlayScreen extends AbstractScreen {
     public void update() {
         stage.act();
         keyboardControlsHandling();
-        beerController.beerFalling(stage);
-        increasePointsWhenCollisionTakesPlace();
+        beerFalling(stage);
+        mainLoopOverBeers();
         scoreLabel.setText("Score: " + game.points());
         lifeLabel.setText("Lifes: " + player.lifes());
-        subtractLifeIfBeerWasNotConsumed();
-        removeBeersWhenTheyLeaveGameArea();
     }
 
-    public void increasePointsWhenCollisionTakesPlace() {
-        for (Actor actor : stage.getActors().items) {
-            if (actor instanceof Beer) {
-                increasePointsIfBeerIsNotConsumed((Beer) actor);
+    public void mainLoopOverBeers() {
+        for (Actor beer : stage.getActors().items) {
+            if (beer instanceof Beer) {
+                increasePointsIfPlayerOverlapsBeerAndRemoveBeer((Beer) beer);
+                subtractLifeIfBeerWasNotConsumedAndRemoveActor((Beer) beer);
             }
         }
     }
 
-    public void removeBeersWhenTheyLeaveGameArea() {
-        for (Actor actor : stage.getActors().items) {
-            if (actor instanceof Beer) {
-                if (actor.getY() < 0) {
-                    actor.remove();
-                }
-            }
+    public void subtractLifeIfBeerWasNotConsumedAndRemoveActor(Beer beer) {
+        if (beer.getY() < 0) {
+            player.subtractLife();
+            beer.remove();
+            stopPlayingIfPlayerHasLostAllLifes(player);
         }
     }
 
-    public void subtractLifeIfBeerWasNotConsumed() {
-        for (Actor actor : stage.getActors().items) {
-            if (actor instanceof Beer) {
-                if (!((Beer) actor).isConsumed && actor.getY() < 0) {
-                    player.subtractLife();
-                    stopPlayingIfPlayerHasLostAllLifes(player);
-                }
-            }
+    private void increasePointsIfPlayerOverlapsBeerAndRemoveBeer(Beer beer) {
+        if (player.bounds().overlaps(beer.getBounds())) {
+            game.increasePoints();
+            beer.remove();
         }
     }
 
-    public void stopPlayingIfPlayerHasLostAllLifes(Player player){
-        if(player.lifes() == 0){
+    public void stopPlayingIfPlayerHasLostAllLifes(Player player) {
+        if (player.lifes() == 0) {
             player.setLifes(3);
             game.setPoints(0);
             game.setScreen(new EndGameScreen(game));
-        }
-    }
-
-
-    private void increasePointsIfBeerIsNotConsumed(Beer beer) {
-        if (player.bounds().overlaps(beer.getBounds()) && !beer.isConsumed) {
-            game.increasePoints();
-            beer.consumed();
-            beer.hideElementIfConsumed();
         }
     }
 
@@ -129,6 +114,14 @@ public class GamePlayScreen extends AbstractScreen {
         }
         if (Gdx.input.isKeyPressed(Input.Keys.ESCAPE)) {
             Gdx.app.exit();
+        }
+    }
+
+    public void beerFalling(Stage stage) {
+        for (Actor actor : stage.getActors().items) {
+            if (actor instanceof Beer) {
+                beerController.falling((Beer) actor);
+            }
         }
     }
 
