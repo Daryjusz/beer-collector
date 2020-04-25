@@ -6,8 +6,8 @@ import com.badlogic.gdx.scenes.scene2d.ui.Image;
 
 public class Player extends Image {
 
-    public final static int WIDTH = 50;
-    public final static int HEIGHT = 50;
+    public final static int WIDTH = 100;
+    public final static int HEIGHT = 100;
 
     public final static int STARTING_X = 0;
     public final static int STARTING_Y = 0;
@@ -15,24 +15,29 @@ public class Player extends Image {
 
     Rectangle bounds;
 
-    public Player(){
-        super(new Texture("badlogic.jpg"));
+    public Player() {
+        super(new Texture("ja.jpg"));
 
-        this.setOrigin(WIDTH/2, HEIGHT/2);
+        this.setOrigin(WIDTH / 2, HEIGHT / 2);
         this.setSize(WIDTH, HEIGHT);
 
         this.setPosition(STARTING_X, STARTING_Y);
     }
 
-    public Rectangle getBounds() {
-        return bounds = new Rectangle((int)getX(), (int)getY(), (int)getWidth(), (int)getHeight());
-    }
 
-    public int getLifes(){
+    public int lifes() {
         return lifes;
     }
 
-    public void subtractLife(){
+    public int setLifes(int lifes) {
+        return this.lifes = lifes;
+    }
+
+    public Rectangle bounds() {
+        return bounds = new Rectangle((int) getX(), (int) getY(), (int) getWidth(), (int) getHeight());
+    }
+
+    public void subtractLife() {
         lifes -= 1;
     }
 }

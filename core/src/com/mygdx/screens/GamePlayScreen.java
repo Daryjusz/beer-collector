@@ -22,7 +22,7 @@ public class GamePlayScreen extends AbstractScreen {
         super(game);
         init();
     }
-    
+
     public void init() {
         initPlayer();
         initNewBeerController();
@@ -32,13 +32,12 @@ public class GamePlayScreen extends AbstractScreen {
     private void initLabels() {
         Label.LabelStyle style = new Label.LabelStyle();
         style.font = new BitmapFont();
+
         scoreLabel = new Label("Score: ", style);
-        scoreLabel.setX(50);
-        scoreLabel.setY(650);
+        scoreLabel.setPosition(50, 650);
 
         lifeLabel = new Label("Lifes: ", style);
-        lifeLabel.setX(50);
-        lifeLabel.setY(630);
+        lifeLabel.setPosition(50, 630);
 
         stage.addActor(scoreLabel);
         stage.addActor(lifeLabel);
@@ -68,8 +67,8 @@ public class GamePlayScreen extends AbstractScreen {
         keyboardControlsHandling();
         beerController.beerFalling(stage);
         increasePointsWhenCollisionTakesPlace();
-        scoreLabel.setText("Score: " + game.getPoints());
-        lifeLabel.setText("Lifes: " + player.getLifes());
+        scoreLabel.setText("Score: " + game.points());
+        lifeLabel.setText("Lifes: " + player.lifes());
         subtractLifeIfBeerWasNotConsumed();
         removeBeersWhenTheyLeaveGameArea();
     }
@@ -82,10 +81,10 @@ public class GamePlayScreen extends AbstractScreen {
         }
     }
 
-    public void removeBeersWhenTheyLeaveGameArea(){
+    public void removeBeersWhenTheyLeaveGameArea() {
         for (Actor actor : stage.getActors().items) {
             if (actor instanceof Beer) {
-                if(actor.getY() < 0) {
+                if (actor.getY() < 0) {
                     actor.remove();
                 }
             }
@@ -95,17 +94,26 @@ public class GamePlayScreen extends AbstractScreen {
     public void subtractLifeIfBeerWasNotConsumed() {
         for (Actor actor : stage.getActors().items) {
             if (actor instanceof Beer) {
-                if(!((Beer) actor).isConsumed && actor.getY() < 0) {
+                if (!((Beer) actor).isConsumed && actor.getY() < 0) {
                     player.subtractLife();
-                    System.out.println(stage.getActors().size);
+                    stopPlayingIfPlayerHasLostAllLifes(player);
                 }
             }
         }
     }
 
+    public void stopPlayingIfPlayerHasLostAllLifes(Player player){
+        if(player.lifes() == 0){
+            player.setLifes(3);
+            game.setPoints(0);
+            game.setScreen(new EndGameScreen(game));
+        }
+    }
+
+
     private void increasePointsIfBeerIsNotConsumed(Beer beer) {
-        if (player.getBounds().overlaps(beer.getBounds()) && !beer.isConsumed) {
-            game.increasePoint();
+        if (player.bounds().overlaps(beer.getBounds()) && !beer.isConsumed) {
+            game.increasePoints();
             beer.consumed();
             beer.hideElementIfConsumed();
         }

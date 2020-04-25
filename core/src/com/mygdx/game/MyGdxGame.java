@@ -16,11 +16,15 @@ public class MyGdxGame extends Game {
         this.setScreen(new SplashScreen(this));
     }
 
-    public void increasePoint(){
+    public void increasePoints(){
         points++;
     }
 
-    public int getPoints() {
+    public int points() {
         return points;
+    }
+
+    public void setPoints(int points){
+        this.points = points;
     }
 }
