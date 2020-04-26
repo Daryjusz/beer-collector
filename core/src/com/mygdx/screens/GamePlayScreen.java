@@ -2,6 +2,7 @@ package com.mygdx.screens;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -16,7 +17,9 @@ public class GamePlayScreen extends AbstractScreen {
     private Player player;
     private BeerController beerController;
     private Label scoreLabel;
+    private Label highScoreLabel;
     private Label lifeLabel;
+    private Preferences prefs;
 
 
     public GamePlayScreen(MyGdxGame game) {
@@ -28,11 +31,15 @@ public class GamePlayScreen extends AbstractScreen {
         initPlayer();
         initBeerController();
         initLabels();
+        prefs = Gdx.app.getPreferences("beer-collector");
     }
 
     private void initLabels() {
         Label.LabelStyle style = new Label.LabelStyle();
         style.font = new BitmapFont();
+
+        highScoreLabel = new Label("High score: ", style);
+        highScoreLabel.setPosition(30, MyGdxGame.HEIGHT - 30);
 
         scoreLabel = new Label("Score: ", style);
         scoreLabel.setPosition(30, MyGdxGame.HEIGHT - 50);
@@ -40,6 +47,7 @@ public class GamePlayScreen extends AbstractScreen {
         lifeLabel = new Label("Lifes: ", style);
         lifeLabel.setPosition(30, MyGdxGame.HEIGHT - 70);
 
+        stage.addActor(highScoreLabel);
         stage.addActor(scoreLabel);
         stage.addActor(lifeLabel);
     }
@@ -68,6 +76,7 @@ public class GamePlayScreen extends AbstractScreen {
         keyboardControlsHandling();
         beerFalling(stage);
         mainLoopOverBeers();
+        updateHighScore();
         scoreLabel.setText("Score: " + game.points());
         lifeLabel.setText("Lifes: " + player.lifes());
     }
@@ -115,6 +124,10 @@ public class GamePlayScreen extends AbstractScreen {
         if (Gdx.input.isKeyPressed(Input.Keys.ESCAPE)) {
             Gdx.app.exit();
         }
+        if (Gdx.input.isKeyPressed(Input.Keys.ALT_LEFT)) {
+            prefs.remove("highScore");
+            prefs.flush();
+        }
     }
 
     public void beerFalling(Stage stage) {
@@ -123,6 +136,14 @@ public class GamePlayScreen extends AbstractScreen {
                 beerController.falling((Beer) actor);
             }
         }
+    }
+
+    private void updateHighScore() {
+        if (game.points() > prefs.getInteger("highScore")) {
+            prefs.putInteger("highScore", game.points());
+            prefs.flush();
+        }
+        highScoreLabel.setText("High score: " + prefs.getInteger("highScore"));
     }
 
     @Override
